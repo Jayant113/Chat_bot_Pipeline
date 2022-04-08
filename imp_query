@@ -1,0 +1,34 @@
+
+############ Conversation length ###################################33 
+SELECT trace , timestamp,insertId,ifnull(Timedifference,0) AS Time_Difference,
+(
+(
+sum(case when ifnull(Timedifference,0)  <= 300  then 0 else 1 end) over(partition by trace order by timestamp)
+)
++1
+)As session_number
+FROM  
+(
+SELECT 
+	trace,
+    insertId,
+    timestamp,
+    LOGIN,
+	DATETIME_DIFF(timestamp,LOGIN, SECOND) AS Timedifference
+
+
+FROM 
+(
+SELECT 
+	trace,
+    insertId,
+	timestamp,
+	LAG(timestamp,1) OVER (PARTITION BY trace ORDER BY timestamp ) LOGIN
+FROM 
+	`celestial-torus-342506.chat_bot.chat10`
+)
+)
+
+################ Total Users #####################
+
+SELECT  DISTINCT trace  FROM `celestial-torus-342506.Chat_bot_input.input_file` 
